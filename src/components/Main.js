@@ -34,7 +34,6 @@ class ImgFigure extends React.Component {
 		if (this.props.arrange.pos) {
 			styleObj = this.props.arrange.pos;
 		}
-
 		return (
 			<figure className="img-figure" style={styleObj}>
 				<img src={this.props.data.imageURL} alt={this.props.data.title}/>
@@ -80,7 +79,7 @@ class AppComponent extends React.Component {
 	 * @param centerIndex 指定居中排布哪一个图片
 	 */
 	rearrange(centerIndex) {
-		let imgsArrangeArr = this.state.imgsArrangeArr,
+		let imgsArrangeArr = this.state.imgsArrangeArr.concat([]),
 			Constants = this.Constants,
 			centerPos = Constants.centerPos,
 			hPosRange = Constants.hPosRange,
@@ -97,6 +96,7 @@ class AppComponent extends React.Component {
 			imgsArrangeCenterArr = imgsArrangeArr.splice(centerIndex, 1);
 
 		imgsArrangeCenterArr[0].pos = centerPos;
+		// centerPos.transform = "rotate(0deg)";
 
 		topImgSpliceIndex = Math.ceil(Math.random() * (imgsArrangeArr.length - topImgNum));
 		imgsArrangeTopArr = imgsArrangeArr.splice(topImgSpliceIndex, topImgNum);
@@ -104,7 +104,9 @@ class AppComponent extends React.Component {
 		imgsArrangeTopArr.forEach(function(value, index) {
 			imgsArrangeTopArr[index].pos = {
 				top: getRangeRandom(vPosRangeTopY[0], vPosRangeTopY[1]),
-				left: getRangeRandom(vPosRangeX[0], vPosRangeX[1])
+				left: getRangeRandom(vPosRangeX[0], vPosRangeX[1]),
+				transform: "scale(0.8) rotate(" + (Math.random() * 360 - 180) + "deg)"
+
 			}
 		});
 
@@ -119,18 +121,19 @@ class AppComponent extends React.Component {
 
 			imgsArrangeArr[i].pos = {
 				top: getRangeRandom(hPosRangeY[0], hPosRangeY[1]),
-				left: getRangeRandom(hPosRangeLORX[0], hPosRangeLORX[1])
+				left: getRangeRandom(hPosRangeLORX[0], hPosRangeLORX[1]),
+				transform: "scale(0.8) rotate(" + (Math.random() * 360 - 180) + "deg)"
 			}
 		}
 
-		if (imgsArrangeTopArr && imgsArrangeTopArr[0]) {
-			imgsArrangeArr.splice(topImgSpliceIndex, 0, imgsArrangeTopArr[0]);
-		}
+		// if (imgsArrangeTopArr && imgsArrangeTopArr[0]) {
+		// 	imgsArrangeArr.splice(topImgSpliceIndex, 0, imgsArrangeTopArr[0]);
+		// }
 
-		imgsArrangeArr.splice(centerIndex, 0, imgsArrangeCenterArr[0]);
+		// imgsArrangeArr.splice(centerIndex, 0, imgsArrangeCenterArr[0]);
 
 		this.setState({
-			imgsArrangeArr: imgsArrangeArr
+			imgsArrangeArr: this.state.imgsArrangeArr
 		});
 	}
 
@@ -142,7 +145,7 @@ class AppComponent extends React.Component {
 			stageW = stageDom.scrollWidth,
 			stageH = stageDom.scrollHeight,
 			halfStageW = Math.ceil(stageW / 2),
-			halfStageH = Math.ceil(stageH / 3);
+			halfStageH = Math.ceil(stageH / 2);
 
 		let imgFigureDOM = findDOMNode(this.refs.imgFigure0),
 			imgW = imgFigureDOM.scrollWidth,
@@ -150,16 +153,16 @@ class AppComponent extends React.Component {
 			halfImgW = Math.ceil(imgW / 2),
 			halfImgH = Math.ceil(imgH / 2);
 
-		console.log(halfStageW, halfImgW);
-
 		this.Constants.centerPos = {
 			left: halfStageW - halfImgW,
-			top: halfStageH - halfImgH
+			top: halfStageH - halfImgH,
+			transform: "scale(1.2) rotate(0deg)"
+				// zIndex: 100
 		};
 
 		// 计算左侧,右侧图片排布范围
 		this.Constants.hPosRange.leftSecX[0] = -halfImgW;
-		this.Constants.hPosRange.leftSecX[1] = -halfImgW - halfImgW * 3;
+		this.Constants.hPosRange.leftSecX[1] = halfStageW - halfImgW * 3;
 		this.Constants.hPosRange.rightSecX[0] = halfStageW + halfImgW;
 		this.Constants.hPosRange.rightSecX[1] = stageW - halfImgW;
 		this.Constants.hPosRange.y[0] = -halfImgH;
@@ -170,10 +173,12 @@ class AppComponent extends React.Component {
 		this.Constants.vPosRange.topY[1] = halfStageH - halfImgH * 3;
 		this.Constants.vPosRange.x[0] = halfStageW - imgW;
 		this.Constants.vPosRange.x[1] = halfStageW;
-
-
+		let self = this;
+		setInterval(function() {
+			self.rearrange(Math.ceil(15 * Math.random()) - 1);
+		}, 2000);
 		// console.log(this.Constants);
-		this.rearrange(2);
+
 	}
 
 
@@ -181,9 +186,9 @@ class AppComponent extends React.Component {
 
 		let controllerUnits = [],
 			ImgFigures = [];
-
 		imageDatas.forEach(function(value, index) {
 			if (!this.state.imgsArrangeArr[index]) {
+				// console.log(this.state.imgsArrangeArr[index]);
 				this.state.imgsArrangeArr[index] = {
 					pos: {
 						left: 0,

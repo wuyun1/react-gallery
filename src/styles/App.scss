@@ -31,7 +31,7 @@ html,body {
   @at-root {
     .img-figure {
       position: absolute;
-
+      
 
       width: 320px;
       height: 360px;
@@ -41,6 +41,8 @@ html,body {
       background-color: #fff;
 
       box-sizing: border-box;
+      transition: all 1.5s ease-in-out;
+      box-shadow: 2px 2px 5px; 
 
       img {
         width: 240px;
@@ -51,6 +53,7 @@ html,body {
 
     figcaption {
       text-align: center;
+
 
       .img-title {
         margin: 20px 0 0 0;
