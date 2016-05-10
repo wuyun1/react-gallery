@@ -23,9 +23,17 @@ function getRangeRandom(low, high) {
 	return Math.ceil(Math.random() * (high - low) + low);
 }
 
+function get30DegRandom() {
+	return (Math.random()>0.5 ?'':'-') + Math.ceil(Math.random()*30);
+}
+
 class ImgFigure extends React.Component {
 
-
+	handleClick(e) {
+		if(this.props.onClick){
+			this.props.onClick(this,e);
+		}
+	}
 
 	render() {
 
@@ -34,8 +42,11 @@ class ImgFigure extends React.Component {
 		if (this.props.arrange.pos) {
 			styleObj = this.props.arrange.pos;
 		}
+		if(this.props.arrange.rotate){
+			styleObj['transform'] = 'rotate(' + this.props.arrange.rotate + 'deg)';
+		}
 		return (
-			<figure className="img-figure" style={styleObj}>
+			<figure className="img-figure" style={styleObj} onClick={this.handleClick.bind(this)}>
 				<img src={this.props.data.imageURL} alt={this.props.data.title}/>
 				<figcaption>
 					<h2 className="img-title">{this.props.data.title}</h2>
@@ -63,23 +74,33 @@ class AppComponent extends React.Component {
 		this.state = {
 			imgsArrangeArr: [
 				/*{
-					pos: [
+					pos: {
 						left:'0',
 						top: '0'
-					]
+					},
+					rotate: 0
 				}*/
 			]
 		};
 
 	}
 
+
+
+	onImgFiguresAction(e){
+		// window.abc=findDOMNode(e);
+		// console.log(findDOMNode(e));
+		this.rearrange(Array.prototype.indexOf.call(document.querySelectorAll(".img-figure"),findDOMNode(e)));
+
+	}
 	/**
 	 
 	 * 重新布局所以图片
 	 * @param centerIndex 指定居中排布哪一个图片
 	 */
 	rearrange(centerIndex) {
-		let imgsArrangeArr = this.state.imgsArrangeArr.concat([]),
+		console.log(centerIndex);
+		let imgsArrangeArr = this.state.imgsArrangeArr,
 			Constants = this.Constants,
 			centerPos = Constants.centerPos,
 			hPosRange = Constants.hPosRange,
@@ -90,22 +111,26 @@ class AppComponent extends React.Component {
 			vPosRangeTopY = vPosRange.topY,
 			vPosRangeX = vPosRange.x,
 
-			imgsArrangeTopArr = [],
+			
+			imgsArrangeCenterArr = imgsArrangeArr.splice(centerIndex,1),
 			topImgNum = Math.ceil(Math.random() * 2),
-			topImgSpliceIndex = 0,
-			imgsArrangeCenterArr = imgsArrangeArr.splice(centerIndex, 1);
+			topImgSpliceIndex = Math.ceil(Math.random() * (imgsArrangeArr.length - topImgNum)),
+			imgsArrangeTopArr = imgsArrangeArr.splice(topImgSpliceIndex, topImgNum);
 
 		imgsArrangeCenterArr[0].pos = centerPos;
-		// centerPos.transform = "rotate(0deg)";
+		imgsArrangeCenterArr[0].rotate = 0;
 
-		topImgSpliceIndex = Math.ceil(Math.random() * (imgsArrangeArr.length - topImgNum));
-		imgsArrangeTopArr = imgsArrangeArr.splice(topImgSpliceIndex, topImgNum);
+
+
+
 
 		imgsArrangeTopArr.forEach(function(value, index) {
-			imgsArrangeTopArr[index].pos = {
-				top: getRangeRandom(vPosRangeTopY[0], vPosRangeTopY[1]),
-				left: getRangeRandom(vPosRangeX[0], vPosRangeX[1]),
-				transform: "scale(0.8) rotate(" + (Math.random() * 360 - 180) + "deg)"
+			imgsArrangeTopArr[index] = {
+				pos:{
+					top: getRangeRandom(vPosRangeTopY[0], vPosRangeTopY[1]),
+					left: getRangeRandom(vPosRangeX[0], vPosRangeX[1])
+				},
+				rotate: get30DegRandom()
 
 			}
 		});
@@ -119,11 +144,16 @@ class AppComponent extends React.Component {
 				hPosRangeLORX = hPosRangeRightSecX;
 			}
 
-			imgsArrangeArr[i].pos = {
-				top: getRangeRandom(hPosRangeY[0], hPosRangeY[1]),
-				left: getRangeRandom(hPosRangeLORX[0], hPosRangeLORX[1]),
-				transform: "scale(0.8) rotate(" + (Math.random() * 360 - 180) + "deg)"
+			imgsArrangeArr[i]={
+				pos:{
+					top: getRangeRandom(hPosRangeY[0], hPosRangeY[1]),
+					left: getRangeRandom(hPosRangeLORX[0], hPosRangeLORX[1])
+				},
+				rotate: get30DegRandom()
 			}
+
+
+			
 		}
 
 		// if (imgsArrangeTopArr && imgsArrangeTopArr[0]) {
@@ -131,9 +161,13 @@ class AppComponent extends React.Component {
 		// }
 
 		// imgsArrangeArr.splice(centerIndex, 0, imgsArrangeCenterArr[0]);
-
+		let newImgsArrangeArr=[];
+		Array.prototype.splice.apply(newImgsArrangeArr,[0,0].concat(imgsArrangeArr));
+		Array.prototype.splice.apply(newImgsArrangeArr,[topImgSpliceIndex,0].concat(imgsArrangeTopArr));
+		Array.prototype.splice.apply(newImgsArrangeArr,[centerIndex,0].concat(imgsArrangeCenterArr));
+		
 		this.setState({
-			imgsArrangeArr: this.state.imgsArrangeArr
+			imgsArrangeArr: newImgsArrangeArr
 		});
 	}
 
@@ -155,8 +189,7 @@ class AppComponent extends React.Component {
 
 		this.Constants.centerPos = {
 			left: halfStageW - halfImgW,
-			top: halfStageH - halfImgH,
-			transform: "scale(1.2) rotate(0deg)"
+			top: halfStageH - halfImgH
 				// zIndex: 100
 		};
 
@@ -173,11 +206,12 @@ class AppComponent extends React.Component {
 		this.Constants.vPosRange.topY[1] = halfStageH - halfImgH * 3;
 		this.Constants.vPosRange.x[0] = halfStageW - imgW;
 		this.Constants.vPosRange.x[1] = halfStageW;
-		let self = this;
-		setInterval(function() {
-			self.rearrange(Math.ceil(15 * Math.random()) - 1);
-		}, 2000);
+		// let self = this;
+		// setInterval(function() {
+		// 	self.rearrange(Math.ceil(15 * Math.random()) - 1);
+		// }, 2000);
 		// console.log(this.Constants);
+		this.rearrange(Math.ceil(15 * Math.random()) - 1);
 
 	}
 
@@ -193,12 +227,13 @@ class AppComponent extends React.Component {
 					pos: {
 						left: 0,
 						top: 0
-					}
+					},
+					rotate:0
 				}
 			}
 
 
-			ImgFigures.push(<ImgFigure data={value} key={'key_'+index} ref={'imgFigure' + index} arrange = {this.state.imgsArrangeArr[index]} />);
+			ImgFigures.push(<ImgFigure onClick={this.onImgFiguresAction.bind(this)} data={value} key={'key_'+index} ref={'imgFigure' + index} arrange = {this.state.imgsArrangeArr[index]} />);
 		}.bind(this));
 
 
