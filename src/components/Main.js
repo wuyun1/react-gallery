@@ -30,11 +30,19 @@ function get30DegRandom() {
 class ImgFigure extends React.Component {
 
 	handleClick(e) {
-		if(!this.props.arrange.rotate)
+
+		if(this.props.arrange.isCenter){
 			this.props.inverse();
-		if(this.props.onClick){
-			this.props.onClick(this,e);
+		}else{
+			this.props.center();
 		}
+		
+
+		// if(!this.props.arrange.rotate)
+		// 	this.props.inverse();
+		// if(this.props.onClick){
+		// 	this.props.onClick(this,e);
+		// }
 	}
 
 	render() {
@@ -50,6 +58,10 @@ class ImgFigure extends React.Component {
 				styleObj[value+'transform'] = 'rotate(' + self.props.arrange.rotate + 'deg)';
 			});
 			
+		}
+
+		if(this.props.arrange.isCenter){
+			styleObj.zIndex = 11;
 		}
 		// else{
 		// 	['','-moz-','-ms-','-webkit-'].forEach(function(value) {
@@ -77,14 +89,14 @@ class ImgFigure extends React.Component {
 
 
 
-class AppComponent extends React.Component {
+class GalleryByReactApp extends React.Component {
 
 	get Constants() {
-		return AppComponent.Constants;
+		return GalleryByReactApp.Constants;
 	}
 
 	set Constants(value) {
-		AppComponent.Constants = value;
+		GalleryByReactApp.Constants = value;
 	}
 
 	constructor() {
@@ -98,7 +110,8 @@ class AppComponent extends React.Component {
 						top: '0'
 					},
 					rotate: 0,
-					isInverse: false
+					isInverse: false,
+					isCenter: false
 				}*/
 			]
 		};
@@ -131,6 +144,12 @@ class AppComponent extends React.Component {
 		}.bind(this);
 	}
 
+	center(index) {
+		return function() {
+			this.rearrange(index);
+		}.bind(this);
+	}
+
 	/**
 	 
 	 * 重新布局所以图片
@@ -154,12 +173,12 @@ class AppComponent extends React.Component {
 			topImgSpliceIndex = Math.ceil(Math.random() * (imgsArrangeArr.length - topImgNum)),
 			imgsArrangeTopArr = imgsArrangeArr.splice(topImgSpliceIndex, topImgNum);
 
-		imgsArrangeCenterArr[0].pos = centerPos;
-		imgsArrangeCenterArr[0].rotate = 0;
-
-
-
-
+		imgsArrangeCenterArr[0]={
+			pos: centerPos,
+			rotate: 0,
+			isCenter: true
+		};
+		
 
 		imgsArrangeTopArr.forEach(function(value, index) {
 			imgsArrangeTopArr[index] = {
@@ -167,7 +186,8 @@ class AppComponent extends React.Component {
 					top: getRangeRandom(vPosRangeTopY[0], vPosRangeTopY[1]),
 					left: getRangeRandom(vPosRangeX[0], vPosRangeX[1])
 				},
-				rotate: get30DegRandom()
+				rotate: get30DegRandom(),
+				isCenter: false
 
 			}
 		});
@@ -186,7 +206,8 @@ class AppComponent extends React.Component {
 					top: getRangeRandom(hPosRangeY[0], hPosRangeY[1]),
 					left: getRangeRandom(hPosRangeLORX[0], hPosRangeLORX[1])
 				},
-				rotate: get30DegRandom()
+				rotate: get30DegRandom(),
+				isCenter: false
 			}
 
 
@@ -244,21 +265,21 @@ class AppComponent extends React.Component {
 		this.Constants.vPosRange.x[0] = halfStageW - imgW;
 		this.Constants.vPosRange.x[1] = halfStageW;
 
-		let self = this;
-		let cindex = 0;
-		let abc = function() {
-			cindex = Math.ceil(15 * Math.random()) - 1;
-			setTimeout(function() {
-				self.rearrange(cindex);
-				setTimeout(function() {
-					self.inverse(cindex)();
-					abc();
-				},600);
-			}, 600);
-		};
-		abc();
+		// let self = this;
+		// let cindex = 0;
+		// let abc = function() {
+		// 	cindex = Math.ceil(15 * Math.random()) - 1;
+		// 	setTimeout(function() {
+		// 		self.rearrange(cindex);
+		// 		setTimeout(function() {
+		// 			self.inverse(cindex)();
+		// 			abc();
+		// 		},600);
+		// 	}, 600);
+		// };
+		// abc();
 		// console.log(this.Constants);
-		// this.rearrange(Math.ceil(15 * Math.random()) - 1);
+		this.rearrange(Math.ceil(15 * Math.random()) - 1);
 
 	}
 
@@ -276,12 +297,13 @@ class AppComponent extends React.Component {
 						top: 0
 					},
 					rotate: get30DegRandom(),
-					isInverse: false
+					isInverse: false,
+					isCenter: false
 				}
 			}
 
 
-			ImgFigures.push(<ImgFigure onClick={this.onImgFiguresAction.bind(this)} data={value} key={'key_'+index} inverse={this.inverse(index)} ref={'imgFigure' + index} arrange = {this.state.imgsArrangeArr[index]} />);
+			ImgFigures.push(<ImgFigure center={this.center(index)} onClick={this.onImgFiguresAction.bind(this)} data={value} key={'key_'+index} inverse={this.inverse(index)} ref={'imgFigure' + index} arrange = {this.state.imgsArrangeArr[index]} />);
 		}.bind(this));
 
 
@@ -298,10 +320,10 @@ class AppComponent extends React.Component {
 	}
 }
 
-AppComponent.defaultProps = {};
+GalleryByReactApp.defaultProps = {};
 
 
-AppComponent.Constants = {
+GalleryByReactApp.Constants = {
 	centerPos: {
 		left: 0,
 		top: 0
@@ -318,4 +340,4 @@ AppComponent.Constants = {
 
 };
 
-export default AppComponent;
+export default GalleryByReactApp;
