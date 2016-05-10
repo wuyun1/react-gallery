@@ -27,6 +27,38 @@ function get30DegRandom() {
 	return (Math.random()>0.5 ?'':'-') + Math.ceil(Math.random()*30);
 }
 
+class ControllerUnit extends React.Component {
+
+	handleClick(e){
+
+
+		if(this.props.arrange.isCenter){
+			this.props.inverse();
+		}else{
+			this.props.center();
+		}
+
+		e.preventDefault();
+		e.stopPropagation();
+	}
+	render() {
+
+		let controllerUnitClassName='controller-unit';
+
+		if(this.props.arrange.isCenter){
+			controllerUnitClassName += ' is-center';
+		}
+
+		if(this.props.arrange.isInverse){
+			controllerUnitClassName += ' is-inverse';
+		}
+
+		return (
+			<span className={controllerUnitClassName} onClick={this.handleClick.bind(this)} ></span>
+		);
+	}
+}
+
 class ImgFigure extends React.Component {
 
 	handleClick(e) {
@@ -37,7 +69,8 @@ class ImgFigure extends React.Component {
 			this.props.center();
 		}
 		
-
+		e.preventDefault();
+		e.stopPropagation();
 		// if(!this.props.arrange.rotate)
 		// 	this.props.inverse();
 		// if(this.props.onClick){
@@ -54,8 +87,8 @@ class ImgFigure extends React.Component {
 		}
 
 		if(this.props.arrange.rotate){
-			['','-moz-','-ms-','-webkit-'].forEach(function(value) {
-				styleObj[value+'transform'] = 'rotate(' + self.props.arrange.rotate + 'deg)';
+			['transform','MozTransform','msTransform','WebkitTransform'].forEach(function(value) {
+				styleObj[value] = 'rotate(' + self.props.arrange.rotate + 'deg)';
 			});
 			
 		}
@@ -135,7 +168,6 @@ class GalleryByReactApp extends React.Component {
 	inverse(index){
 
 		return function () {
-			console.log(index);
 			var imgsArrangeArr = this.state.imgsArrangeArr;
 			imgsArrangeArr[index].isInverse = !imgsArrangeArr[index].isInverse;
 			this.setState({
@@ -169,7 +201,7 @@ class GalleryByReactApp extends React.Component {
 
 			
 			imgsArrangeCenterArr = imgsArrangeArr.splice(centerIndex,1),
-			topImgNum = Math.ceil(Math.random() * 2),
+			topImgNum = Math.floor(Math.random() * 2),
 			topImgSpliceIndex = Math.ceil(Math.random() * (imgsArrangeArr.length - topImgNum)),
 			imgsArrangeTopArr = imgsArrangeArr.splice(topImgSpliceIndex, topImgNum);
 
@@ -304,6 +336,9 @@ class GalleryByReactApp extends React.Component {
 
 
 			ImgFigures.push(<ImgFigure center={this.center(index)} onClick={this.onImgFiguresAction.bind(this)} data={value} key={'key_'+index} inverse={this.inverse(index)} ref={'imgFigure' + index} arrange = {this.state.imgsArrangeArr[index]} />);
+			controllerUnits.push(<ControllerUnit key={'key_'+index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)} ></ControllerUnit>);
+
+
 		}.bind(this));
 
 

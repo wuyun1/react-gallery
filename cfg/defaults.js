@@ -37,7 +37,7 @@ function getDefaultModules() {
       test: /\.styl/,
       loader: 'style-loader!css-loader!stylus-loader'
     }, {
-      test: /\.(png|jpg|gif|woff|woff2)$/,
+      test: /\.(png|jpg|gif|woff|woff2|eot|ttf|woff|svg|)$/,
       loader: 'url-loader?limit=8192'
     }, {
       test: /\.json$/,
